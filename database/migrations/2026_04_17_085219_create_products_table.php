@@ -14,14 +14,14 @@ return new class extends Migration
         Schema::create('products', function (Blueprint $table) {
             $table->id();
             $table->foreignId('category_id')->constrained()->onDelete('cascade');
-            $table->string('nombre');
+            $table->string('name');
             $table->string('slug')->unique();
-            $table->text('descripcion');
-            $table->decimal('precio', 8, 2);
+            $table->text('description');
+            $table->decimal('price', 8, 2);
             $table->integer('stock');
-            $table->string('talla')->nullable(); // Para camisetas
-            $table->string('material')->nullable(); // Para figuras
-            $table->string('dimensiones')->nullable(); // Para figuras
+            $table->string('size')->nullable(); // Talla
+            $table->string('material')->nullable(); // Material
+            $table->string('dimensions')->nullable(); // Dimensiones
             $table->timestamps();
         });
     }

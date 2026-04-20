@@ -50,20 +50,66 @@ class AuthController extends Controller
             ], Response::HTTP_UNAUTHORIZED); // 401
         }
     } catch (JWTException $e) {
-        // 3. Error técnico al generar el token
         return response()->json([
             'error' => 'No se pudo generar el token'
-        ], Response::HTTP_INTERNAL_SERVER_ERROR); // 500
+        ], Response::HTTP_INTERNAL_SERVER_ERROR); //500
     }
 
     // 4. Éxito: Devolvemos el token al cliente
     return $this->respondWithToken($token);
 }
+
+    public function who()
+    {
+        return response()->json(auth()->user());
+    }
+
+    public function logout()
+{
+    try {
+        //Recuperamos el token de la cabecera Authorization
+        $token = JWTAuth::getToken();
+
+        //Lo metemos en la blacklist
+        JWTAuth::invalidate($token);
+
+        return response()->json([
+            'message' => 'Sesión cerrada correctamente'
+        ]);
+    } catch (JWTException $e) {
+        //Si el token ya era inválido o no existe
+        return response()->json([
+            'error' => 'No se pudo cerrar la sesión, el token no es válido'
+        ], Response::HTTP_INTERNAL_SERVER_ERROR);
+    }
+}
+    public function refresh()
+{
+    try {
+        // 1. Recuperamos el token actual de la petición
+        $token = JWTAuth::getToken();
+
+        // 2. Generamos el nuevo token (automáticamente invalida el anterior)
+        $newToken = auth()->refresh();
+
+        // 3. Invalidamos el token viejo manualmente (por seguridad extra)
+        JWTAuth::invalidate($token);
+
+        // 4. Devolvemos la respuesta estándar con el nuevo "expires_in"
+        return $this->respondWithToken($newToken);
+
+    } catch (JWTException $e) {
+        return response()->json([
+            'error' => 'Error al refrescar el token, la sesión puede haber expirado del todo'
+        ], Response::HTTP_INTERNAL_SERVER_ERROR);
+    }
+}
+
     protected function respondWithToken($token)
     {
         return response()->json([
             'token'      => $token,
-            'token_type' => 'bearer', // Indica que es un token de "portador"
+            'token_type' => 'bearer',
             'expires_in' => auth()->factory()->getTTL() * 60 // Convertimos minutos a segundos
         ]);
     }

@@ -55,6 +55,9 @@ class User extends Authenticatable implements JWTsubject
     }
     public function getJWTCustomClaims()
     {
-    return [];
+        return [
+                "name" => $this->name,
+                "rol"  => $this->rol // Añadimos el rol para saber si mostrar el panel de Admin
+            ];
     }
 }
