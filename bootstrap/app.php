@@ -12,7 +12,11 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        //
+        $middleware->alias([
+            'auditoria' => \App\Http\Middleware\LogRequests::class,
+            'mayusculas' => \App\Http\Middleware\UppercaseName::class,
+            'is_admin' => \App\Http\Middleware\CheckAdminRole::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //
