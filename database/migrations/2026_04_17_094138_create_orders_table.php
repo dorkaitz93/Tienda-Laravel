@@ -15,9 +15,9 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->nullable()->constrained()->onDelete('set null');
             $table->decimal('total', 10, 2);
-            $table->enum('estado', ['pendiente', 'pagado', 'enviado', 'cancelado'])->default('pendiente');
-            $table->string('email_contacto');
-            $table->text('direccion_envio');
+            $table->enum('status', ['pending', 'paid', 'shipped', 'cancelled'])->default('pending');
+            $table->string('contact_email');
+            $table->text('shipping_address');
             $table->timestamps();
         });
     }

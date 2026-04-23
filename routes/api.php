@@ -12,7 +12,8 @@ Route::get("/test", function() {
 //Login & registro:
 
 Route::post("/register", [AuthController::class, 'register']);
-Route::post("/login", [AuthController::class, 'login'])->name("login");
+
+Route::post("/login", [AuthController::class, 'login'])->middleware("throttle:login")->name("login");
 
 // Rutas Protegidas por JWT
 Route::middleware("jwt.auth")->group(function(){

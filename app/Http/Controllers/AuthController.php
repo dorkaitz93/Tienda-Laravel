@@ -13,6 +13,9 @@ use Illuminate\Support\Facades\Hash;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use Tymon\JWTAuth\Exceptions\JWTException;
 use App\Http\Requests\LoginRequest;
+use App\Events\UserLoggedIn;
+use App\Events\UserRegistered;
+
 
 class AuthController extends Controller
 {
@@ -27,7 +30,8 @@ class AuthController extends Controller
             'email'    => $validatedData["email"],
             'password' => bcrypt($validatedData["password"]) // Encriptación obligatoria
         ]);
-
+        
+        event(new UserRegistered($user));
         return response()->json([
             "message" => "Usuario registrado correctamente"
         ], Response::HTTP_CREATED); // Status 201
@@ -54,7 +58,8 @@ class AuthController extends Controller
             'error' => 'No se pudo generar el token'
         ], Response::HTTP_INTERNAL_SERVER_ERROR); //500
     }
-
+    
+    event(new UserLoggedIn(auth()->user(), $request->ip()));
     // 4. Éxito: Devolvemos el token al cliente
     return $this->respondWithToken($token);
 }
