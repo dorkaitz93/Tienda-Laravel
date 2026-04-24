@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\OrderController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProductController;
 
@@ -11,15 +12,17 @@ Route::get("/test", function() {
 
 //Login & registro:
 
-Route::post("/register", [AuthController::class, 'register']);
+Route::post("register", [AuthController::class, 'register']);
 
-Route::post("/login", [AuthController::class, 'login'])->middleware("throttle:login")->name("login");
+Route::post("login", [AuthController::class, 'login'])->middleware("throttle:login")->name("login");
 
 // Rutas Protegidas por JWT
 Route::middleware("jwt.auth")->group(function(){
-    Route::get('/who', [AuthController::class, 'who']);
-    Route::post('/logout', [AuthController::class, 'logout']);
-    Route::post('/refresh', [AuthController::class, 'refresh']);
+    Route::get('who', [AuthController::class, 'who']);
+    Route::post('logout', [AuthController::class, 'logout']);
+    Route::post('refresh', [AuthController::class, 'refresh']);
+    Route::post('orders', [OrderController::class, 'store']);
+    Route::get('orders', [OrderController::class, 'index']);
 });
 
 // publico
@@ -31,4 +34,6 @@ Route::middleware(['jwt.auth', 'is_admin'])->group(function () {
     Route::post('products', [ProductController::class, 'store']);
     Route::put('products/{product}', [ProductController::class, 'update']);
     Route::delete('products/{product}', [ProductController::class, 'destroy']);
+    Route::get('admin/all-orders', [OrderController::class, 'allOrders']);
+
 });

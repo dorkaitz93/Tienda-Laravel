@@ -24,6 +24,7 @@ class User extends Authenticatable implements JWTsubject
         'name',
         'email',
         'password',
+        'rol',
     ];
 
     /**
@@ -34,6 +35,7 @@ class User extends Authenticatable implements JWTsubject
     protected $hidden = [
         'password',
         'remember_token',
+        'rol',
     ];
 
     /**
@@ -60,4 +62,8 @@ class User extends Authenticatable implements JWTsubject
                 "rol"  => $this->rol // Añadimos el rol para saber si mostrar el panel de Admin
             ];
     }
+    public function user()
+{
+    return $this->belongsTo(User::class);
+}
 }

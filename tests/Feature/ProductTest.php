@@ -1,27 +1,62 @@
 <?php
+
 uses(Tests\TestCase::class, Illuminate\Foundation\Testing\RefreshDatabase::class);
 
+use App\Models\User;
 use App\Models\Product;
 use App\Models\Category;
+use Illuminate\Support\Facades\Event;
+use App\Events\ProductOutOfStock;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
-it('crea un producto y el observer formatea el nombre y genera el slug', function () {
+it('actualiza un producto y dispara el evento de stock cero', function () {
+    
+    // 1. Fake de eventos
+    Event::fake();
 
-        $category = Category::create([
-        'name' => 'Maquetas de Rascacielos',
-        'slug' => 'maquetas-de-rascacielos' 
+    // 2. Creamos el usuario con TU columna 'rol' y valor 'admin'
+    $admin = User::create([
+        'name' => 'Admin Dorki',
+        'email' => 'admin@test.com',
+        'password' => bcrypt('123456'),
+        'rol' => 'admin'
     ]);
+    
+    $token = JWTAuth::fromUser($admin);
 
-    // 2. Creamos el producto
+    // 3. Creamos categoría y producto inicial
+    $category = Category::create(['name' => 'Rascacielos', 'slug' => 'rascacielos']);
     $product = Product::create([
-        'name' => 'rascacielos de cristal',
+        'name' => 'Torre Antigua',
         'category_id' => $category->id,
-        'description' => 'Pieza única',
-        'price' => 100,
+        'description' => 'Vieja torre',
+        'price' => 50.00,
         'stock' => 10,
+        'slug' => 'torre-antigua'
     ]);
 
-    // 3. Verificamos que el Observer ha trabajado
-    expect($product->name)->toBe('Rascacielos de cristal') 
-        ->and($product->slug)->not->toBeNull()
-        ->and($product->slug)->toContain('rascacielos-de-cristal');
+    // Llamamos al Update
+    $response = $this->withHeader('Authorization', 'Bearer ' . $token)
+        ->putJson("/api/products/{$product->id}", [
+            'name' => 'Torre Moderna',
+            'category_id' => $category->id,
+            'description' => 'Torre actualizada',
+            'price' => 99.99,
+            'stock' => 0 // Bajamos stock a 0 para que salte el evento
+        ]);
+
+    // 5. VERIFICACIONES
+    
+   
+    $response->assertStatus(200);
+
+    // Verificamos que los datos se han guardado de verdad 
+    $this->assertDatabaseHas('products', [
+        'id' => $product->id,
+        'name' => 'Torre Moderna',
+        'stock' => 0
+    ]);
+
+    // C. Verificamos que el evento se lanzó
+    Event::assertDispatched(ProductOutOfStock::class);
 });

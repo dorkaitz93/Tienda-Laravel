@@ -99,4 +99,21 @@ class OrderController extends Controller
             'data'   => $orders
         ], Response::HTTP_OK);
     }
+
+    public function allOrders()
+{
+    // 1. Obtenemos todos los pedidos con sus relaciones
+    // Incluimos 'user' para saber quién compró y 'products' para ver qué compró
+    $orders = Order::with(['user', 'products'])
+        ->orderBy('created_at', 'desc')
+        ->get();
+
+    // 2. Respondemos con éxito
+    return response()->json([
+        'status' => true,
+        'message' => 'Listado de todos los pedidos recuperado',
+        'count'  => $orders->count(),
+        'data'   => $orders
+    ], Response::HTTP_OK);
+}
 }

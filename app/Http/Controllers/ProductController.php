@@ -30,7 +30,7 @@ class ProductController extends Controller
 
     public function store(ProductRequest $request)
     {
-        // El Observer se encargará de generar el SLUG y el SKU automáticamente
+
         $product = Product::create($request->validated());
 
         return response()->json([
@@ -48,8 +48,8 @@ class ProductController extends Controller
     {
         $data = $request->validated();
 
-
-        //stock cambia 
+        $product->update($data);
+       
         if ($product->wasChanged('stock') && $product->stock <= 0) {
             event(new ProductOutOfStock($product));
         }
