@@ -23,17 +23,22 @@ class LoginRequest extends ApiFormRequest
     public function rules(): array
     {
         return [
-            'email' => 'required|string|email',
-            'password' => 'required|string|min:6'
+            'email' => 'required|string|email|max:255',
+            'password' => 'required|string|min:8|max:128'
         ];
     }
 
     public function messages()
     {
         return [
+            //email
             'email.required'    => 'El correo es obligatorio para entrar',
             'email.email'       => 'Introduce un formato de correo válido',
+            'email.max'         => 'El email introducido no puede tener mas de 255 caracteres',
             'password.required' => 'Debes introducir la contraseña',
+            'password.max'      => 'La contraseña no puede tener mas de 128 caracteres',
+            'password.min'      => 'la contraseña no puede ser inferior a 8 caracteres',
+
         ];
     }
 }

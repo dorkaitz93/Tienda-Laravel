@@ -35,5 +35,6 @@ Route::middleware(['jwt.auth', 'is_admin'])->group(function () {
     Route::put('products/{product}', [ProductController::class, 'update']);
     Route::delete('products/{product}', [ProductController::class, 'destroy']);
     Route::get('admin/all-orders', [OrderController::class, 'allOrders']);
+    Route::put('admin/orders/{order}/status', [OrderController::class, 'updateStatus']);
 
 });

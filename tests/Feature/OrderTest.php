@@ -36,7 +36,7 @@ it('crea un pedido correctamente si hay stock', function () {
         'slug' => 'hogaza-okin'
     ]);
 
-    $response = $this->withHeader('Authorization', 'Bearer ' . $token)
+    $response = $this->withHeaders(['Authorization' => 'Bearer ' . $token])
         ->postJson('/api/orders', [
             'shipping_address' => 'Calle Mayor 1',
             'contact_email' => 'dorki@okin.eus',
@@ -68,7 +68,7 @@ it('falla si el stock es insuficiente', function () {
         'slug' => 'nvidia-rtx'
     ]);
 
-    $response = $this->withHeader('Authorization', 'Bearer ' . $token)
+    $response = $this->withHeaders(['Authorization' => 'Bearer ' . $token])
         ->postJson('/api/orders', [
             'shipping_address' => 'País Vasco',
             'contact_email' => 'dorki@okin.eus',
@@ -85,7 +85,7 @@ it('falla si el carrito viene vacío', function () {
    
     $token = createCustomerToken();
 
-    $response = $this->withHeader('Authorization', 'Bearer ' . $token)
+    $response = $this->withHeaders(['Authorization' => 'Bearer ' . $token])
         ->postJson('/api/orders', [
             'shipping_address' => 'Calle Falsa 123',
             'contact_email' => 'error@test.com',
@@ -111,7 +111,7 @@ it('usa el precio de la base de datos y no el que mande el usuario', function ()
         'slug' => 'oro'
     ]);
 
-    $response = $this->withHeader('Authorization', 'Bearer ' . $token)
+    $response = $this->withHeaders(['Authorization' => 'Bearer ' . $token])
         ->postJson('/api/orders', [
             'shipping_address' => 'País Vasco',
             'contact_email' => 'dorki@okin.eus',
@@ -146,7 +146,7 @@ it('falla si el producto tiene stock cero', function () {
         'slug' => 'agotado'
     ]);
 
-    $response = $this->withHeader('Authorization', 'Bearer ' . $token)
+    $response = $this->withHeaders(['Authorization' => 'Bearer ' . $token])
         ->postJson('/api/orders', [
             'shipping_address' => 'Calle Falsa',
             'contact_email' => 'dorki@okin.eus',
@@ -163,7 +163,7 @@ it('prohíbe a un cliente ver todos los pedidos de la tienda', function () {
     $user = User::create(['name' => 'Cliente', 'email' => 'c@c.com', 'password' => '1', 'rol' => 'cliente']);
     $token = JWTAuth::fromUser($user);
 
-    $response = $this->withHeader('Authorization', 'Bearer ' . $token)
+    $response = $this->withHeaders(['Authorization' => 'Bearer ' . $token])
         ->getJson('/api/admin/all-orders');
 
     $response->assertStatus(403); // El portero is_admin debe pararle los pies
@@ -183,7 +183,7 @@ it('permite a un usuario ver solo sus propios pedidos', function () {
     Order::create(['user_id' => $userB->id, 'total' => 200, 'status' => 'pending', 'shipping_address' => 'Dir B', 'contact_email' => 'b@b.com']);
 
     // 3. El User A consulta SUS pedidos
-    $response = $this->withHeader('Authorization', 'Bearer ' . $tokenA)
+    $response = $this->withHeaders(['Authorization' => 'Bearer ' . $tokenA])
         ->getJson('/api/orders');
 
     $response->assertStatus(200)
@@ -203,7 +203,7 @@ it('permite al admin ver todos los pedidos de la tienda', function () {
     Order::create(['user_id' => $user->id, 'total' => 75, 'status' => 'pending', 'shipping_address' => 'Y', 'contact_email' => 'c@c.com']);
 
     // 2. El Admin consulta la ruta especial de administración
-    $response = $this->withHeader('Authorization', 'Bearer ' . $tokenAdmin)
+    $response = $this->withHeaders(['Authorization' => 'Bearer ' . $tokenAdmin])
         ->getJson('/api/admin/all-orders');
 
     $response->assertStatus(200)
@@ -216,9 +216,26 @@ it('bloquea a un cliente que intenta acceder a la ruta de todos los pedidos', fu
     $user = User::create(['name' => 'Hacker', 'email' => 'h@h.com', 'password' => '1', 'rol' => 'cliente']);
     $token = JWTAuth::fromUser($user);
 
-    $response = $this->withHeader('Authorization', 'Bearer ' . $token)
+    $response = $this->withHeaders(['Authorization' => 'Bearer ' . $token])
         ->getJson('/api/admin/all-orders');
 
     // El middleware is_admin debería lanzar un 403
     $response->assertStatus(403);
+});
+
+it('permite al admin cambiar el estado de un pedido', function () {
+    /** @var \Tests\TestCase $this */
+    $admin = User::create(['name' => 'Admin', 'email' => 'admin@admin.com', 'password' => '1', 'rol' => 'admin']);
+    $token = JWTAuth::fromUser($admin);
+    
+    $user = User::create(['name' => 'C', 'email' => 'c@c.com', 'password' => '1', 'rol' => 'cliente']);
+    $order = Order::create(['user_id' => $user->id, 'total' => 50, 'status' => 'pending', 'shipping_address' => 'X', 'contact_email' => 'c@c.com']);
+
+    $response = $this->withHeaders(['Authorization' => 'Bearer ' . $token])
+        ->putJson('/api/admin/orders/' . $order->id . '/status', [
+            'status' => 'shipped'
+        ]);
+
+    $response->assertStatus(200);
+    $this->assertDatabaseHas('orders', ['id' => $order->id, 'status' => 'shipped']);
 });

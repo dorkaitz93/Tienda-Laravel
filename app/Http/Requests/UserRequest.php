@@ -23,20 +23,39 @@ class UserRequest extends ApiFormRequest
     public function rules(): array
     {
     return[ 
-        'name'     => 'required|string|max:255',
+        'name'     => ['required', 'string', 'max:255', 'regex:/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/u'],
         'email'    => 'required|string|email|max:255|unique:users',
-        'password' => 'required|string|min:6',
+        'password' => 'required|string|min:8',
+        'rol'      => 'nullable|string|in:admin,cliente',
+        
         ];
     }
 
     public function messages()
     {
         return [
+            //name
             'name.required'     => 'El nombre es obligatorio',
-            'email.required'    => 'El correo es obligatorio',
-            'email.unique'      => 'Este correo ya está registrado',
-            'password.required' => 'La contraseña es obligatoria',
-            'password.min'      => 'La contraseña debe tener al menos 6 caracteres',
+            'name.string'       => 'El nombre debe ser texto válido',
+            'name.max'          => 'El nombre no puede superar los 255 caracteres.',
+            'name.regex'        => 'El nombre solo puede contener letras y espacios',
+
+            //email
+
+            'email.required'    => 'El correo electrónico es obligatorio.',
+            'email.string'      => 'El correo electrónico debe ser texto válido.',
+            'email.email'       => 'El formato del correo electrónico no es válido.',
+            'email.max'         => 'El correo electrónico no puede superar los 255 caracteres.',
+            'email.unique'      => 'Este correo electrónico ya está registrado',
+
+            //password
+            'password.required' => 'La contraseña es obligatoria.',
+            'password.string'   => 'La contraseña debe ser texto válido.',
+            'password.min'      => 'La contraseña debe tener al menos 8 caracteres',
+
+            //rol
+            'rol.string'        => 'El rol debe ser texto válido.',
+            'rol.in'            => 'El rol seleccionado no es válido.',
         ];
     }
 }

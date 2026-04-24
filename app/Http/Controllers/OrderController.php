@@ -102,8 +102,6 @@ class OrderController extends Controller
 
     public function allOrders()
 {
-    // 1. Obtenemos todos los pedidos con sus relaciones
-    // Incluimos 'user' para saber quién compró y 'products' para ver qué compró
     $orders = Order::with(['user', 'products'])
         ->orderBy('created_at', 'desc')
         ->get();
@@ -116,4 +114,19 @@ class OrderController extends Controller
         'data'   => $orders
     ], Response::HTTP_OK);
 }
+
+    public function updateStatus(\Illuminate\Http\Request $request, \App\Models\Order $order)
+    {
+        // Validamos que el estado solo pueda ser uno de estos 3
+        $data = $request->validate([
+            'status' => 'required|string|in:pending,shipped,delivered'
+        ]);
+
+        $order->update(['status' => $data['status']]);
+
+        return response()->json([
+            'message' => 'Estado del pedido actualizado a: ' . $data['status'],
+            'data' => $order
+        ], \Symfony\Component\HttpFoundation\Response::HTTP_OK);
+    }
 }
