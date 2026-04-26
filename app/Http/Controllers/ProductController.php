@@ -39,13 +39,29 @@ class ProductController extends Controller
         ], Response::HTTP_CREATED);
     }
 
-    public function show(Product $product)
-    {
-        return response()->json($product->load('category'));
+    public function show($id)
+{
+    $product = Product::find($id);
+
+    if (!$product) {
+        return response()->json([
+            'message' => "el producto con ID {$id} no existe en nuestro catálogo",
+        ], Response::HTTP_NOT_FOUND);
     }
 
-    public function update(ProductRequest $request, Product $product)
+    return response()->json($product->load('category'), Response::HTTP_OK);
+}
+
+    public function update(ProductRequest $request, $id)
     {
+        $product = Product::find($id);
+
+        if (!$product) {
+            return response()->json([
+                'message' => "el producto con ID {$id} no existe en nuestro catálogo"
+            ], Response::HTTP_NOT_FOUND);
+        }
+
         $data = $request->validated();
 
         $product->update($data);
@@ -60,8 +76,15 @@ class ProductController extends Controller
         ], Response::HTTP_OK);
     }
 
-    public function destroy(Product $product)
-    {
+    public function destroy($id)
+    {   
+        $product = Product::find($id);
+        
+        if(!$product){
+            return response()->json([
+                'message' => "el producto con ID {$id} no existe en nuestro catálogo"
+            ], Response::HTTP_NOT_FOUND);
+        }
         $product->delete();
         return response()->json([
             "message" => "Producto eliminado correctamente"

@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Http\Requests\UserRequest;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Hash;
+use App\Models\Product;
 
 //login
 use Tymon\JWTAuth\Facades\JWTAuth;

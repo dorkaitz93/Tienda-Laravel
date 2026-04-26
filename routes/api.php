@@ -27,13 +27,13 @@ Route::middleware("jwt.auth")->group(function(){
 
 // publico
 Route::get('products', [ProductController::class, 'index']);
-Route::get('products/{product}', [ProductController::class, 'show']);
+Route::get('products/{id}', [ProductController::class, 'show']);
 
 // SOLO admin
 Route::middleware(['jwt.auth', 'is_admin'])->group(function () {
     Route::post('products', [ProductController::class, 'store']);
-    Route::put('products/{product}', [ProductController::class, 'update']);
-    Route::delete('products/{product}', [ProductController::class, 'destroy']);
+    Route::put('products/{id}', [ProductController::class, 'update']);
+    Route::delete('products/{id}', [ProductController::class, 'destroy']);
     Route::get('admin/all-orders', [OrderController::class, 'allOrders']);
     Route::put('admin/orders/{order}/status', [OrderController::class, 'updateStatus']);
 

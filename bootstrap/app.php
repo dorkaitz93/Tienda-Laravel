@@ -28,14 +28,5 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        $exceptions->render(function (NotFoundHttpException $e, Request $request) {
-        
-        if ($request->is('api/*')) {
-            return response()->json([
-                'status'  => false,
-                'message' => 'El producto o recurso solicitado no existe.',
-                'error'   => 'Resource Not Found'
-            ], Response::HTTP_NOT_FOUND);
-        }
-    });
+
     })->create();
