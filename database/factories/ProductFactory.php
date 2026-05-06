@@ -28,6 +28,7 @@ class ProductFactory extends Factory
         return [
             'category_id' => Category::factory(), // Si no le pasamos categoría, creará una nueva
             'name'        => $name,
+            'image' => 'products/eritz-prueba.jpg',
             'slug'        => Str::slug($name) . '-' . $this->faker->unique()->numberBetween(1, 10000), 
             'description' => $this->faker->sentence(),
             'price'       => $this->faker->randomFloat(2, 9, 90),

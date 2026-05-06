@@ -8,6 +8,7 @@ use App\Models\Product;
 use App\Http\Requests\ProductRequest;
 use Symfony\Component\HttpFoundation\Response;
 use App\Events\ProductOutOfStock;
+use App\Http\Resources\ProductResource;
 
 class ProductController extends Controller
 {
@@ -25,7 +26,7 @@ class ProductController extends Controller
 
         $products = $query->paginate(10);
 
-        return response()->json($products, Response::HTTP_OK);
+        return ProductResource::collection($products);
     }
 
     public function store(ProductRequest $request)
