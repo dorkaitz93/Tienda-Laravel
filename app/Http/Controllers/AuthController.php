@@ -115,6 +115,7 @@ class AuthController extends Controller
     {
         return response()->json([
             'token'      => $token,
+            'user'       => auth()->user(),
             'token_type' => 'bearer',
             'expires_in' => auth()->factory()->getTTL() * 60 // Convertimos minutos a segundos
         ]);
